@@ -1,0 +1,11 @@
+body {
+    background: lightblue;
+}
+
+canvas {
+    background: #fff;
+    margin: 20px;
+    /*display: block;
+    margin-left: auto;
+    margin-right: auto;*/
+}

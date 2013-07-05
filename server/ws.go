@@ -2,11 +2,14 @@ package main
 
 import (
 	"code.google.com/p/go.net/websocket"
+	"container/list"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 )
+
+var clients = list.New()
 
 func ws_send(buf string, ws *websocket.Conn) {
 	if ws == nil || len(buf) == 0 {
@@ -36,9 +39,14 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 func WsHandle(ws *websocket.Conn) {
 	log.Println("new client")
+	clients.PushBack(ws)
 	for {
 		if buff, err := ws_recv(ws); err != 1 {
-			_ = buff
+			for e := clients.Front(); e != nil; e = e.Next() {
+				if ws != e.Value.(*websocket.Conn) {
+					ws_send(buff, e.Value.(*websocket.Conn))
+				}
+			}
 		} else {
 			return
 		}

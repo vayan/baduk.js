@@ -25,15 +25,17 @@ function connect() {
     }
 }
 
-function onSignal(message) {
+function onSignal (message) {
     logg("Sending setup signal");
     ws.send(message);
 }
+
 
 function createPeerConnection() {
     try {
         logg("creating peer connection..");
         peerConn = new RTCPeerConnection(cfg, onSignal);
+        logg(peerConn);
     } catch (e) {
             logg("Failed to create PeerConnection, exception: " + e.message);
     }
@@ -64,7 +66,6 @@ ws.onmessage = function(e) {
         createPeerConnection();
         started = true;
     }
-    // Message returned from other side
     logg('Processing signaling message...');
     peerConn.processSignalingMessage(e.data);
 

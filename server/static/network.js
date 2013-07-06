@@ -1,8 +1,21 @@
 var ws;
 var conn_started = false;
 var peerConn = null;
-var cfg = {"iceServers":[{"url":"stun:stun.l.google.com:19302"}]},
-    con = { 'optional': [{'DtlsSrtpKeyAgreement': true}, {'RtpDataChannels': true }] };
+var dataConn = null;
+var cfg = {
+    "iceServers": [{
+            "url": "stun:stun.l.google.com:19302"
+        }
+    ]
+},
+    con = {
+        'optional': [{
+                'DtlsSrtpKeyAgreement': true
+            }, {
+                'RtpDataChannels': true
+            }
+        ]
+    };
 
 if (ws != null) {
     ws.close();
@@ -25,7 +38,7 @@ function connect() {
     }
 }
 
-function onSignal (message) {
+function onSignal(message) {
     logg("Sending setup signal");
     ws.send(message);
 }
@@ -36,8 +49,38 @@ function createPeerConnection() {
         logg("creating peer connection..");
         peerConn = new RTCPeerConnection(cfg, onSignal);
         logg(peerConn);
+        peerConn.onicecandidate = function(e) {
+            logg("ICE server");
+            if (e.candidate) {
+                document.localICECandidateForm.localICECandidate.value = JSON.stringify(e.candidate);
+            }
+        };
+
+        peerConn.onconnection = function(e) {
+            logg("connected");
+        }
+
+        peerConn.createOffer(function(offerDesc) {
+            logg("Created local offer" + offerDesc);
+            peerConn.setLocalDescription(offerDesc);
+            ws.send(JSON.stringify(offerDesc));
+        }, function() {
+            logg("Couldn't create offer");
+        });
+
+        try {
+            dataConn = peerConn.createDataChannel('test', {
+                reliable: true
+            });
+            logg("create data chan");
+            dataConn.onmessage = function(e) {
+                logg("got message datacon", e.data);
+            };
+        } catch (e) {
+            logg("No data channel (pc1)" + e);
+        }
     } catch (e) {
-            logg("Failed to create PeerConnection, exception: " + e.message);
+        logg("Failed to create PeerConnection, exception: " + e.message);
     }
 }
 
@@ -55,24 +98,26 @@ function createPeerConnection() {
     }
 };*/
 
+function sendMessage(s) {
+    var channel = new RTCMultiSession();
+    channel.send({message: s});
+    return false;
+};
+
 ws.onopen = function() {
     logg("ws open");
     connect();
 };
 
 ws.onmessage = function(e) {
-   logg("RECEIVED: " + e.data);
-    if (!started) {
-        createPeerConnection();
-        started = true;
-    }
+    logg("RECEIVED: " + e.data);
+    //createPeerConnection();
     logg('Processing signaling message...');
-    peerConn.processSignalingMessage(e.data);
+    var desc = new RTCSessionDescription(JSON.parse(e.data));
+    peerConn.setRemoteDescription(desc);
 
 };
 
 ws.onclose = function(e) {
     logg("no ws");
 };
-
-

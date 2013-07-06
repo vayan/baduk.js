@@ -27,6 +27,7 @@ func ws_recv(ws *websocket.Conn) (string, int) {
 
 	if err := websocket.Message.Receive(ws, &buf); err != nil {
 		fmt.Println(err)
+		erri = 1
 	}
 	log.Printf("recv: '%s'", buf)
 	return buf, erri

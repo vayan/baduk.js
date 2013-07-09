@@ -2,6 +2,7 @@ var ws;
 var conn_started = false;
 var peerConn = null;
 var dataConn = null;
+var attachConnectionListeners = null;
 var cfg = {
     "iceServers": [{
             "url": "stun:stun.l.google.com:19302"
@@ -68,6 +69,18 @@ function createPeerConnection() {
             logg("Couldn't create offer");
         });
 
+        peerConn.createAnswer(function(answer) {
+            logg('Created answer.');
+            peerConn.setLocalDescription(answer, function() {
+                logg('Set localDescription to answer.');
+            });
+        });
+
+        logg('listening for data channel..');
+        peerConn.ondatachannel = function(evt) {
+            logg('received data channel !');
+        }
+
         try {
             dataConn = peerConn.createDataChannel('test', {
                 reliable: true
@@ -75,6 +88,9 @@ function createPeerConnection() {
             logg("create data chan");
             dataConn.onmessage = function(e) {
                 logg("got message datacon", e.data);
+            };
+            dataConn.onopen = function(e) {
+                logg("open datacon", e.data);
             };
         } catch (e) {
             logg("No data channel (pc1)" + e);
@@ -84,23 +100,11 @@ function createPeerConnection() {
     }
 }
 
-/*var notify = function(title, body) {
-    var icon = "";
-    var perm = window.webkitNotifications.checkPermission();
-    if (perm === 0 && title !== '' && body !== '' && usersettings.Notify) { //if auth
-        var notification = window.webkitNotifications.createNotification(
-            icon,
-            title,
-            body);
-        notification.show();
-    } else { //request auth
-        window.webkitNotifications.requestPermission();
-    }
-};*/
-
 function sendMessage(s) {
     var channel = new RTCMultiSession();
-    channel.send({message: s});
+    channel.send({
+        message: s
+    });
     return false;
 };
 

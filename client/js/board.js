@@ -1,4 +1,7 @@
-var context;
+var context, color;
+var playersTurn = true;
+//var white = true;
+//var black = false;
 //grid width and height
 var bw = 400;
 var bh = 400;
@@ -34,26 +37,35 @@ function drawBoard(){
         context.lineTo(bw + p, 0.5 + x + p);
     }
 
-    context.strokeStyle = "black";
+    context.strokeStyle = "#000000";
     context.stroke();
 }
 
 function playGo() {
 
     $('#board_canvas').click(function(e) {
-
         putStone(e.pageX, e.pageY);
     });
 }
 
-function putStone(xMouse, yMouse ) {
+function putStone(xMouse, yMouse) {
+
+    if (playersTurn == true) {
+        color = "black";
+    }
+    else if (playersTurn == false){
+        color = "white";
+    }
+
+    playersTurn = !playersTurn;
 
     context.beginPath();
     context.arc(xMouse-(p*2), yMouse-(p*2), 15, 0, Math.PI*2, true);
-    console.log(xMouse);
-    console.log(yMouse);
     context.closePath();
+    context.fillStyle=color;
     context.fill();
+    context.strokeStyle="black";
+    context.stroke();
 }
 
 function removeStone() {

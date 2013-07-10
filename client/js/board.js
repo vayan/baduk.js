@@ -5,6 +5,16 @@ var playersTurn = true;
 //grid width and height
 var bw = 400;
 var bh = 400;
+var context, color;
+var playersTurn = true;
+
+/*
+var bw = casew * nbcase;
+var bh = caseh * nbcase;
+var casew = 40;
+var caseh = 40;
+var nbcase = 8;
+*/
 //padding around grid
 var p = 10;
 //size of canvas (420*420)

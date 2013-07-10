@@ -1,25 +1,17 @@
-var context, color;
+var context, color, cW, cH;
 var playersTurn = true;
 //var white = true;
 //var black = false;
 //grid width and height
-var bw = 400;
-var bh = 400;
-var context, color;
-var playersTurn = true;
+var caseW = 40;
+var caseH = 40;
+var nbCases = 18;
+var bW = caseW * nbCases;
+var bH = caseH * nbCases;
 
-/*
-var bw = casew * nbcase;
-var bh = caseh * nbcase;
-var casew = 40;
-var caseh = 40;
-var nbcase = 8;
-*/
 //padding around grid
 var p = 10;
-//size of canvas (420*420)
-//var cw = bw + (p*2) + 1;
-//var ch = bh + (p*2) + 1;
+var padding = (p*2) + 1;
 
 $(document).ready(function(){
     init();
@@ -28,27 +20,30 @@ $(document).ready(function(){
 function init() {
 
     context = $('#board_canvas')[0].getContext('2d');
+    cW = $("canvas").attr("width", bW+padding);
+    cH = $("canvas").attr("height", bH+padding);
 
-    drawBoard();
+    drawGoban();
     playGo();
 }
 
-function drawBoard(){
+function drawGoban(){
 
-    for (var x = 0; x <= bw; x += 40) {
+    for (var x = 0; x <= bW; x += 40) {
 
         context.moveTo(0.5 + x + p, p);
-        context.lineTo(0.5 + x + p, bh + p);
+        context.lineTo(0.5 + x + p, bH + p);
     }
 
-    for (var x = 0; x <= bh; x += 40) {
+    for (var x = 0; x <= bH; x += 40) {
 
         context.moveTo(p, 0.5 + x + p);
-        context.lineTo(bw + p, 0.5 + x + p);
+        context.lineTo(bW + p, 0.5 + x + p);
     }
 
     context.strokeStyle = "#000000";
     context.stroke();
+    drawHoshiTengen();
 }
 
 function playGo() {
@@ -78,7 +73,59 @@ function putStone(xMouse, yMouse) {
     context.stroke();
 }
 
+function drawHoshiTengen() {
+    if (nbCases == 18) {
+
+        context.beginPath();
+
+        // hoshis
+        // x = 3
+        context.arc(nbCases/6*caseW+padding/2 , nbCases/6*caseH+ padding/2, 8, 0, Math.PI*2, true);
+        context.arc(nbCases/6*caseW+padding/2 , (nbCases-3)*caseH+ padding/2, 8, 0, Math.PI*2, true);
+        context.arc(nbCases/6*caseW+padding/2 , nbCases/2*caseH+ padding/2, 8, 0, Math.PI*2, true);
+
+        // x = 9
+        context.arc(nbCases/2*caseW+padding/2 , nbCases/6*caseH+ padding/2, 8, 0, Math.PI*2, true);
+        context.arc(nbCases/2*caseW+padding/2 , (nbCases-3)*caseH+ padding/2, 8, 0, Math.PI*2, true);
+
+        // x = 15
+        context.arc((nbCases-3)*caseW+padding/2 , nbCases/6*caseH+ padding/2, 8, 0, Math.PI*2, true);
+        context.arc((nbCases-3)*caseW+padding/2 , (nbCases-3)*caseH+ padding/2, 8, 0, Math.PI*2, true);
+        context.arc((nbCases-3)*caseW+padding/2 , nbCases/2*caseH+ padding/2, 8, 0, Math.PI*2, true);
+
+        // tengen
+        context.arc(nbCases/2*caseW+padding/2 , nbCases/2*caseH+ padding/2, 10, 0, Math.PI*2, true);
+        context.closePath();
+        context.fill();
+
+        context.beginPath();
+        context.arc(nbCases/2*caseW+padding/2 , nbCases/2*caseH+ padding/2, 6, 0, Math.PI*2, true);
+        context.strokeStyle="white";
+        context.closePath();
+        context.stroke();
+    }
+    else {
+
+    }
+}
+
+
 function removeStone() {
     //SOON
 }
 
+
+function Game(x, y) {
+    this.size_x = x;
+    this.size_y = y;
+    this.board = [];
+
+}
+
+Game.prototype.GenBoard = function(x, y) {
+    return [] ;
+};
+
+Game.prototype.PutStone = function(first_argument) {
+
+};

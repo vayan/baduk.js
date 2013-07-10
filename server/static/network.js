@@ -86,6 +86,19 @@ function makeOffer() {
     });
 };
 
+function createDataConnection() {
+        dataConn = peerConn.createDataChannel('test', {
+           reliable: true
+        })
+        log("create data chan");
+        dataConn.onmessage = function(e) {
+            log("got message datacon", e.data);
+        };
+        dataConn.onopen = function(e) {
+            log("open datacon", e.data);
+        };
+}
+
 function createPeerConnection(isServer) {
     try {
         log("_creating_ peer connection..");
@@ -108,7 +121,6 @@ function createPeerConnection(isServer) {
             log("open datacon", e.data);
         };
 
-
           peerConn.onicecandidate = function(e) {
             log("receive ICE server", e);
             //send CANDIDATE to ws
@@ -127,7 +139,7 @@ function createPeerConnection(isServer) {
         }
 
         peerConn.ondatachannel = function(evt) {
-            log('received data channel !');
+            log('received data channel !', evt);
         }
 
         if (isServer)
@@ -181,5 +193,8 @@ ws.onclose = function(e) {
 $(document).ready(function() {
     $("#foo").click(function() {
         createPeerConnection(true);
+    });
+    $("#bar").click(function(){
+        createDataConnection();
     });
 });

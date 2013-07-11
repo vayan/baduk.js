@@ -2,6 +2,7 @@ var ws;
 var conn_started = false;
 var peerConn;
 var dataConn;
+var datacon2;
 var attachConnectionListeners = null;
 
 var cfg = {
@@ -26,47 +27,60 @@ if (ws != null) {
 
 ws = new WebSocket("ws://localhost:8080/ws");
 
-function connect() {
-    log("Starting stuff");
+function newConnec(id) {
     createPeerConnection();
+    listenICEcandidates();
+    setupNegotiationHandler();
+    listenDataChan();
+    createDataConnection();
 }
 
-function onSignal(message) {
-    log("Sending setup signal");
-   sendMessage(message);
-}
-
-function createDataConnection() {
-    try {
-        dataConn = peerConn.createDataChannel('test', {
-            reliable: true
+function createPeerConnection() {
+    log("Creating peer Connectin");
+    peerConn = new RTCPeerConnection(cfg, {
+            optional: [{
+                    RtpDataChannels: true
+                }
+            ]
         });
-        log("create data chan");
-        dataConn.onmessage = function(e) {
-            log("got message datacon", e.data);
-        };
-        dataConn.onopen = function(e) {
-            log("open datacon", e.data);
-        };
-    } catch (e) {
-        log("No data channel, error " , e);
-    }
 }
 
-function makeAnswer() {
-  peerConn.createAnswer(function(answer) {
-    log('Created answer.');
-    peerConn.setLocalDescription(answer, function() {
-      log('Set localDescription to answer.');
-      sendMessage(answer);
-    }, function(err) {
-      log('Failed to setLocalDescription, ', err);
-    });
-  }, function(err) {
-    log('Failed to create answer, ', err);
-  });
-};
+function listenICEcandidates() {
+    log("listening ICEcandidates");
+    peerConn.onicecandidate = function(e) {
+            log("receive ICE server", e);
+            //send CANDIDATE to ws
+            if (e.candidate) {
+                sendMessage(JSON.stringify({ "candidate": evt.candidate }));
+            }
+        }
+}
 
+function listenDataChan() {
+    log("listening datachan");
+ peerConn.ondatachannel = function(evt) {
+    log('Received data channel', evt);
+     datacon2 = evt.channel;
+     datacon2.onmessage = function(e) {
+            log("got message datacon", e);
+        };
+        datacon2.onopen = function(e) {
+            log("open datacon", e);
+            datacon2.send("testeeee");
+        };
+        datacon2.onclose = function (e) {
+            log("datacon closed", e);
+        }
+  };
+}
+
+function setupNegotiationHandler() {
+  log('Listening for negotiationneeded');
+  peerConn.onnegotiationneeded = function() {
+   log('`negotiationneeded` triggered');
+    //makeOffer();
+  };
+}
 
 function makeOffer() {
      log('starting create offer...');
@@ -85,35 +99,13 @@ function makeOffer() {
     }, function(err) {
         log('Failed to createOffer, ', err);
     });
-};
-
-function createDataConnection() {
-        dataConn = peerConn.createDataChannel('test', {
-           reliable: true
-        })
-        log("create data chan");
-        dataConn.onmessage = function(e) {
-            log("got message datacon", e.data);
-        };
-        dataConn.onopen = function(e) {
-            log("open datacon", e.data);
-        };
 }
 
-function createPeerConnection(isServer) {
+function createDataConnection() {
     try {
-        log("_creating_ peer connection..");
-        peerConn = new RTCPeerConnection(cfg, {
-            optional: [{
-                    RtpDataChannels: true
-                }
-            ]
-        });
-        //log(peerConn);
-
         dataConn = peerConn.createDataChannel('test', {
-           reliable: true
-        })
+            reliable: true
+        });
         log("create data chan");
         dataConn.onmessage = function(e) {
             log("got message datacon", e.data);
@@ -121,39 +113,40 @@ function createPeerConnection(isServer) {
         dataConn.onopen = function(e) {
             log("open datacon", e.data);
         };
-
-          peerConn.onicecandidate = function(e) {
-            log("receive ICE server", e);
-            //send CANDIDATE to ws
-            if (e.candidate) {
-                sendMessage(JSON.stringify({ "candidate": evt.candidate }));
-            }
+        dataConn.onclose = function (e) {
+            log("datacon closed", e);
         }
-
-        peerConn.oniceconnectionstatechange = function() {
-            if ( !! self.pc && self.pc.iceConnectionState === 'disconnected') {
-                log('iceConnectionState is disconnected');
-            }
-        };
-        peerConn.onconnection = function(e) {
-            log("connected");
-        }
-
-        peerConn.ondatachannel = function(evt) {
-            log('received data channel !', evt);
-        }
-
-        if (isServer)
-            makeOffer();
-        //else
-          //makeAnswer();
-
-
-
-
     } catch (e) {
-        log("Failed to create PeerConnection, error: ", e.message);
+        log("No data channel, error " , e);
     }
+}
+
+function makeAnswer() {
+  peerConn.createAnswer(function(answer) {
+    log('Created answer.');
+    peerConn.setLocalDescription(answer, function() {
+      log('Set localDescription to answer.');
+      sendMessage(answer);
+    }, function(err) {
+      log('Failed to setLocalDescription, ', err);
+    });
+  }, function(err) {
+    log('Failed to create answer, ', err);
+  });
+}
+
+function handleSDP(sdp, type) {
+    //check why must sdp and not sdp.sdp from json..
+  sdp = new RTCSessionDescription(sdp);
+
+  peerConn.setRemoteDescription(sdp, function() {
+    log('Set remoteDescription: ' , type);
+    if (type === 'OFFER') {
+      makeAnswer();
+    }
+  }, function(err) {
+    log('Failed to setRemoteDescription, ', err);
+  });
 }
 
 function sendMessage(s) {
@@ -168,22 +161,12 @@ ws.onopen = function() {
 };
 
 ws.onmessage = function(e) {
-    if (!peerConn) {
-        createPeerConnection(false);
-    }
-
-    log("_WS_ RECEIVED: ", e);
     var jsone = JSON.parse(e.data);
-
-    if (jsone.sdp) {
-        log('Added remote descr ');
-        peerConn.setRemoteDescription(new RTCSessionDescription(jsone.sdp), function(){
-            makeAnswer();
-        }, function(err) { log("Error set remote descr ", err);  });
-    }
-    else {
-        log('Added ICE candidate.');
-        peerConn.addIceCandidate(new RTCIceCandidate(jsone.candidate));
+    if (!peerConn) {
+        newConnec();
+        handleSDP(jsone, 'OFFER');
+    } else {
+        handleSDP(jsone, 'ANSWER');
     }
 };
 
@@ -193,7 +176,8 @@ ws.onclose = function(e) {
 
 $(document).ready(function() {
     $("#foo").click(function() {
-        createPeerConnection(true);
+        newConnec();
+        makeOffer();
     });
     $("#bar").click(function(){
         createDataConnection();

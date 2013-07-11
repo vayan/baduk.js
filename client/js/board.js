@@ -1,13 +1,13 @@
 var context, color, cW, cH;
 var playersTurn = true;
-//var white = true;
-//var black = false;
+
 //grid width and height
 var caseW = 40;
 var caseH = 40;
 var nbCases = 18;
 var bW = caseW * nbCases;
 var bH = caseH * nbCases;
+var arrayBoard = new Array(bW);
 
 //padding around grid
 var p = 10;
@@ -50,6 +50,10 @@ function playGo() {
 
     $('#board_canvas').click(function(e) {
         putStone(e.pageX, e.pageY);
+
+        console.log(e.pageX);
+        console.log(e.pageY);
+
     });
 }
 
@@ -61,7 +65,7 @@ function putStone(xMouse, yMouse) {
     else if (playersTurn == false){
         color = "white";
     }
-
+console.log("mouseX : " + xMouse);
     playersTurn = !playersTurn;
 
     context.beginPath();
@@ -109,6 +113,43 @@ function drawHoshiTengen() {
     }
 }
 
+function realPos() {
+
+}
+/*
+function fillArrayBoard(, ) {
+
+    for (var x = 0; x < bW; x += caseH) {
+
+        // code here
+        arrayBoard[x] = new Array(bH);
+        for (var y = 0; y < bH; y += caseW) {
+
+            // code here
+            arrayBoard[x][y] = '';
+        }
+    }
+}
+
+
+
+
+
+
+
+
+//YOUR TURN
+
+onclick(x_pixel, y_pixel) {
+    x, y = RealPos() //ca calcul les positions reel depuis les position pixel
+    putstone(x,y, mycolor);
+}
+
+putstone(x,y, color) {
+    board[x][y] = color
+    RefreshBoard(board); //ca prend l'array et redessinne TOUTE la board graphique
+}
+
 
 function removeStone() {
     //SOON
@@ -129,3 +170,4 @@ Game.prototype.GenBoard = function(x, y) {
 Game.prototype.PutStone = function(first_argument) {
 
 };
+ */

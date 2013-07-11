@@ -1,5 +1,4 @@
 //
-
 var socket = new Socket();
 var host;
 
@@ -28,7 +27,7 @@ function Connection(id, socket) {
     this.createPeerConnection();
     this.listenICEcandidates();
     this.listenDataChan();
-    this.createDataConnection();
+    this.dc = this.createDataConnection();
 }
 
 Connection.prototype.createPeerConnection = function() {
@@ -55,61 +54,13 @@ Connection.prototype.listenICEcandidates = function() {
     }
 };
 
-
 Connection.prototype.listenDataChan = function() {
     var self = this;
     log(this.logtype + "Listening for datachannel");
     this.pc.ondatachannel = function(evt) {
         log(self.logtype + 'Received datachannel, ', evt);
-        self.dc2 = evt.channel;
-        self.dc2.onmessage = function(e) {
-            log(self.logtype + "got message datacon", e);
-        };
-        self.dc2.onopen = function(e) {
-            log(self.logtype + "open datacon", e);
-        };
-        self.dc2.onclose = function(e) {
-            log(self.logtype + "datacon closed", e);
-        }
+        self.dc2 = self.createDataConnection(evt.channel);
     };
-};
-
-
-Connection.prototype.makeOffer = function() {
-    var self = this;
-    log(this.logtype + 'Starting to create offer...');
-    this.pc.createOffer(function(offer) {
-        log(self.logtype + 'Offer created, ', offer);
-        self.pc.setLocalDescription(offer, function() {
-            log(self.logtype + 'Set localDescription to offer');
-            self.ws.send(offer);
-        }, function(err) {
-            log(self.logtype + 'Failed to setLocalDescription, ', err);
-        });
-    }, function(err) {
-        log(self.logtype + 'Failed to createOffer, ', err);
-    });
-};
-
-Connection.prototype.createDataConnection = function() {
-    var self = this;
-    try {
-        self.dc = self.pc.createDataChannel('test', {
-            reliable: true
-        });
-        log(self.logtype + "Create DataChannel");
-        self.dc.onmessage = function(e) {
-            log(self.logtype + "got message datacon", e.data);
-        };
-        self.dc.onopen = function(e) {
-            log(self.logtype + "open datacon", e.data);
-        };
-        self.dc.onclose = function(e) {
-            log(self.logtype + "datacon closed", e);
-        }
-    } catch (e) {
-        log(self.logtype + "Error DataChannel, ", e);
-    }
 };
 
 Connection.prototype.makeAnswer = function() {
@@ -127,6 +78,21 @@ Connection.prototype.makeAnswer = function() {
     });
 };
 
+Connection.prototype.makeOffer = function() {
+    var self = this;
+    log(this.logtype + 'Starting to create offer...');
+    this.pc.createOffer(function(offer) {
+        log(self.logtype + 'Offer created, ', offer);
+        self.pc.setLocalDescription(offer, function() {
+            log(self.logtype + 'Set localDescription to offer');
+            self.ws.send(offer);
+        }, function(err) {
+            log(self.logtype + 'Failed to setLocalDescription, ', err);
+        });
+    }, function(err) {
+        log(self.logtype + 'Failed to createOffer, ', err);
+    });
+};
 
 Connection.prototype.handleSDP = function(sdp, type) {
     var self = this;
@@ -143,6 +109,29 @@ Connection.prototype.handleSDP = function(sdp, type) {
     });
 };
 
+Connection.prototype.createDataConnection = function(dc) {
+    var self = this;
+    try {
+        if (!dc) {
+            dc = self.pc.createDataChannel('test', {
+                reliable: true
+            });
+        }
+        log(self.logtype + "Create DataChannel");
+        dc.onmessage = function(e) {
+            log(self.logtype + "got message datacon", e.data);
+        };
+        dc.onopen = function(e) {
+            log(self.logtype + "open datacon", e.data);
+        };
+        dc.onclose = function(e) {
+            log(self.logtype + "datacon closed", e);
+        }
+    } catch (e) {
+        log(self.logtype + "Error DataChannel, ", e);
+    }
+    return dc;
+};
 
 $(document).ready(function() {
     $("#start").click(function() {

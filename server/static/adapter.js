@@ -1,4 +1,3 @@
-var exports = this;
 
 if (window.mozRTCPeerConnection) {
   var BrowserType = 'Firefox';
@@ -8,5 +7,5 @@ if (window.mozRTCPeerConnection) {
   var BrowserType = 'Unknown';
 }
 
-exports.RTCSessionDescription = window.mozRTCSessionDescription || window.RTCSessionDescription;
-exports.RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConnection || window.RTCPeerConnection;
+var RTCSessionDescription = window.mozRTCSessionDescription || window.RTCSessionDescription;
+var RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConnection || window.RTCPeerConnection;

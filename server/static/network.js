@@ -3,6 +3,7 @@ var conn_started = false;
 var peerConn;
 var dataConn;
 var attachConnectionListeners = null;
+
 var cfg = {
     "iceServers": [{
             "url": "stun:stun.l.google.com:19302"
@@ -128,7 +129,7 @@ function createPeerConnection(isServer) {
                 sendMessage(JSON.stringify({ "candidate": evt.candidate }));
             }
         }
-        
+
         peerConn.oniceconnectionstatechange = function() {
             if ( !! self.pc && self.pc.iceConnectionState === 'disconnected') {
                 log('iceConnectionState is disconnected');
@@ -147,9 +148,9 @@ function createPeerConnection(isServer) {
         //else
           //makeAnswer();
 
-      
 
-    
+
+
     } catch (e) {
         log("Failed to create PeerConnection, error: ", e.message);
     }
@@ -175,11 +176,11 @@ ws.onmessage = function(e) {
     var jsone = JSON.parse(e.data);
 
     if (jsone.sdp) {
-        log('Added remote descr');
+        log('Added remote descr ');
         peerConn.setRemoteDescription(new RTCSessionDescription(jsone.sdp), function(){
             makeAnswer();
-        });
-    } 
+        }, function(err) { log("Error set remote descr ", err);  });
+    }
     else {
         log('Added ICE candidate.');
         peerConn.addIceCandidate(new RTCIceCandidate(jsone.candidate));

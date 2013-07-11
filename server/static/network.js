@@ -1,6 +1,4 @@
 //
-var socket = new Socket();
-var host;
 
 function Connection(id, socket) {
     this.id = id;
@@ -11,33 +9,40 @@ function Connection(id, socket) {
     this.ws = socket;
     this.cfg = {
         "iceServers": [{
-                "url": "stun:stun.l.google.com:19302"
-            }
-        ]
+            "url": "stun:stun.l.google.com:19302"
+        }]
     },
-        con = {
-            'optional': [{
-                    'DtlsSrtpKeyAgreement': true
-                }, {
-                    'RtpDataChannels': true
-                }
-            ]
-        };
-
+    con = {
+        'optional': [{
+            'DtlsSrtpKeyAgreement': true
+        }, {
+            'RtpDataChannels': true
+        }]
+    };
+    //this.setID();
     this.createPeerConnection();
     this.listenICEcandidates();
     this.listenDataChan();
     this.dc = this.createDataConnection();
 }
 
+Connection.prototype.setID = function() {
+    var self = this;
+    log(this.logtype + "Setting id");
+    self.ws.send({
+            "Key": "SETKEY",
+            "Uri": self.id,
+            "Data": ""
+    });
+};
+
 Connection.prototype.createPeerConnection = function() {
     var self = this;
     log(this.logtype + "Creating RTCPeerConnection");
     this.pc = new RTCPeerConnection(self.cfg, {
         optional: [{
-                RtpDataChannels: true
-            }
-        ]
+            RtpDataChannels: true
+        }]
     });
 };
 
@@ -47,9 +52,13 @@ Connection.prototype.listenICEcandidates = function() {
     this.pc.onicecandidate = function(e) {
         log(self.logtype + "Received ICE server, ", e);
         if (e.candidate) {
-            self.ws.send(JSON.stringify({
-                "candidate": evt.candidate
-            }));
+            self.ws.send({
+                "Key": "CANDIDATE",
+                "Uri": self.id,
+                "Data": JSON.stringify({
+                    "candidate": evt.candidate
+                })
+            });
         }
     }
 };
@@ -64,12 +73,16 @@ Connection.prototype.listenDataChan = function() {
 };
 
 Connection.prototype.makeAnswer = function() {
-     var self = this;
+    var self = this;
     this.pc.createAnswer(function(answer) {
         log(self.logtype + 'Created answer');
         self.pc.setLocalDescription(answer, function() {
             log(self.logtype + 'Set localDescription to answer');
-            self.ws.send(answer);
+            self.ws.send({
+                "Key": "ANSWER",
+                "Uri": self.id,
+                "Data": JSON.stringify(answer)
+            });
         }, function(err) {
             log(self.logtype + 'Failed to setLocalDescription, ', err);
         });
@@ -85,7 +98,11 @@ Connection.prototype.makeOffer = function() {
         log(self.logtype + 'Offer created, ', offer);
         self.pc.setLocalDescription(offer, function() {
             log(self.logtype + 'Set localDescription to offer');
-            self.ws.send(offer);
+            self.ws.send({
+                "Key": "OFFER",
+                "Uri": self.id,
+                "Data": JSON.stringify(offer)
+            });
         }, function(err) {
             log(self.logtype + 'Failed to setLocalDescription, ', err);
         });
@@ -132,14 +149,3 @@ Connection.prototype.createDataConnection = function(dc) {
     }
     return dc;
 };
-
-$(document).ready(function() {
-    $("#start").click(function() {
-        host = new Connection("dsd", socket);
-        host.makeOffer();
-    });
-    $("#send").click(function() {
-        host.dc.send($("#msg").val());
-        host.dc2.send($("#msg").val());
-    });
-});

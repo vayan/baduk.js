@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go.net/websocket"
 	"container/list"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -10,6 +11,19 @@ import (
 )
 
 var clients = list.New()
+
+type Client struct {
+	ws   *websocket.Conn
+	data string
+	id   string
+	msg  *Message
+}
+
+type Message struct {
+	Key  string
+	Uri  string
+	Data string
+}
 
 func ws_send(buf string, ws *websocket.Conn) {
 	if ws == nil || len(buf) == 0 {
@@ -35,19 +49,49 @@ func ws_recv(ws *websocket.Conn) (string, int) {
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("index.html")
+
 	t.Execute(w, nil)
 }
 
+//change list to array
 func WsHandle(ws *websocket.Conn) {
-	log.Println("new client")
-	clients.PushBack(ws)
+	log.Println("New client")
+	clients.PushBack(Client{ws, "", "", nil})
 	for {
 		if buff, err := ws_recv(ws); err != 1 {
+			var msg Message
+			json.Unmarshal([]byte(buff), &msg)
+			log.Println("Message decode ", msg)
+
 			for e := clients.Front(); e != nil; e = e.Next() {
-				if ws != e.Value.(*websocket.Conn) {
-					ws_send(buff, e.Value.(*websocket.Conn))
+				cl := e.Value.(Client)
+				if ws == cl.ws {
+					switch msg.Key {
+					case "SETKEY":
+						cl.id = msg.Uri
+						for e := clients.Front(); e != nil; e = e.Next() {
+							cli := e.Value.(Client)
+							if cli.ws != ws && cli.id == msg.Uri && cli.msg != nil {
+								log.Panicln("HEREEEEEEE")
+								ws_send(msg.Data, cli.ws)
+							}
+						}
+						break
+					case "OFFER":
+						cl.msg = &msg
+						for e := clients.Front(); e != nil; e = e.Next() {
+							cli := e.Value.(Client)
+							log.Panicln(cli.ws, cli.id, cli.msg)
+							if cli.ws != ws && cli.id == msg.Uri && cli.msg != nil {
+
+								ws_send(msg.Data, cli.ws)
+							}
+						}
+						break
+					}
 				}
 			}
+
 		} else {
 			return
 		}

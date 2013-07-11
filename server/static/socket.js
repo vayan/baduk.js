@@ -1,15 +1,25 @@
 //
-function Socket () {
+
+function Socket() {
     var self = this;
     this.logtype = "_WS_  : "
     this.ws = new WebSocket("ws://localhost:8080/ws");
 
     this.ws.onopen = function() {
-        log(self.logtype+ "Open");
+        log(self.logtype + "Open");
+        if (uri) {
+            socket.send({
+                "Key": "SETKEY",
+                "Uri": uri,
+                "Data": ""
+            });
+            host = new Connection(uri, socket);
+            host.makeOffer();
+        }
     };
 
     this.ws.onmessage = function(e) {
-        log(self.logtype+ " Received message, ", e.data);
+        log(self.logtype + " Received message, ", e.data);
         var jsone = JSON.parse(e.data);
         if (!host) {
             host = new Connection("dssd", self);
@@ -19,12 +29,12 @@ function Socket () {
         }
     };
     this.ws.onclose = function(e) {
-        log(self.logtype+ "Closed");
+        log(self.logtype + "Closed");
     };
 }
 
 Socket.prototype.send = function(s) {
     s = JSON.stringify(s);
-    log(this.logtype+ "Sending : ", s);
+    log(this.logtype + "Sending : ", s);
     this.ws.send(s);
 };

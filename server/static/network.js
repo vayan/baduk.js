@@ -19,12 +19,17 @@ function Connection(id, socket) {
             'RtpDataChannels': true
         }]
     };
-    this.testCompat();
+    this.testBrowser();
     this.createPeerConnection();
     this.listenICEcandidates();
     this.listenDataChan();
     this.dc = this.createDataConnection();
 }
+
+Connection.prototype.send = function(s) {
+    var self = this;
+    self.dc.send(JSON.stringify(s))
+};
 
 Connection.prototype.setID = function() {
     var self = this;
@@ -36,10 +41,10 @@ Connection.prototype.setID = function() {
     });
 };
 
-Connection.prototype.testCompat = function() {
+Connection.prototype.testBrowser = function() {
     var self = this;
-    log(this.logtype + "checking if browser compatible");
-
+    log(this.logtype + "Checking if browser compatible");
+    //TODO
 };
 
 Connection.prototype.createPeerConnection = function() {
@@ -58,6 +63,7 @@ Connection.prototype.listenICEcandidates = function() {
     this.pc.onicecandidate = function(e) {
         log(self.logtype + "Received ICE server, ", e);
         log(self.logtype + '[c="color: red"]you can share the url[c]');
+        $("#loading-message").text("Share this url with someone");
         if (e.candidate) {
             self.ws.send({
                 "Key": "CANDIDATE",
@@ -66,6 +72,7 @@ Connection.prototype.listenICEcandidates = function() {
                     "candidate": evt.candidate
                 })
             });
+
         }
     }
 };
@@ -144,10 +151,13 @@ Connection.prototype.createDataConnection = function(dc) {
         log(self.logtype + "Create DataChannel");
         dc.onmessage = function(e) {
             log(self.logtype + "got message datacon", e.data);
+            $("#chatlog").val($('#chatlog').val()+e.data+"\n");
         };
         dc.onopen = function(e) {
             log(self.logtype + "Open datacon", e.data);
             self.ws.close();
+             $(".page-state").hide();
+            $("#gaming").show();
         };
         dc.onclose = function(e) {
             log(self.logtype + "datacon closed", e);

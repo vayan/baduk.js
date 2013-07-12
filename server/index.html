@@ -5,16 +5,35 @@
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>web rtc</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-	<button id="start">new</button>
-     <input type="text" id="msg" />
-	<button id="send">send</button>
+    <div id="landing" class="page-state hidden">
+        <p>Hey</p>
+        <button id="start">new</button>
+    </div>
+    <div id="loading" class="page-state hidden">
+        <span class="loading-icon"><img src="/static/img/spinner.gif" /></p>
+        <p id="loading-message">connecting...</p>
+    </div>
+    <div id="gaming" class="page-state hidden">
+        <input type="text" id="msg" />
+        <button id="send">send</button>
+        <textarea id="chatlog"></textarea>
+    </div>
+
+
+
 	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="static/log.js"></script>
 	<script src="static/adapter.js"></script>
     <script src="static/socket.js"></script>
     <script src="static/network.js"></script>
+    <script src="static/game.js"></script>
     <script src="static/baduk.js"></script>
 </body>
 </html>

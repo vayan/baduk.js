@@ -13,19 +13,27 @@ function Socket() {
                 "Uri": uri,
                 "Data": ""
             });
-            host = new Connection(uri, socket);
-            host.makeOffer();
+            //host = new Connection(uri, socket);
+            //host.makeOffer();
         }
     };
 
     this.ws.onmessage = function(e) {
         log(self.logtype + " Received message, ", e.data);
         var jsone = JSON.parse(e.data);
-        if (!host) {
-            host = new Connection("dssd", self);
-            host.handleSDP(jsone, 'OFFER');
-        } else {
-            host.handleSDP(jsone, 'ANSWER');
+
+        switch (jsone.Key) {
+            case 'NEW':
+                host = new Connection(uri, socket);
+                host.makeOffer();
+                break;
+            case 'OFFER':
+                host = new Connection(jsone.Uri, self);
+                host.handleSDP(JSON.parse(jsone.Data), 'OFFER');
+                break;
+            case 'ANSWER':
+                host.handleSDP(JSON.parse(jsone.Data), 'ANSWER');
+                break;
         }
     };
     this.ws.onclose = function(e) {

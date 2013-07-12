@@ -2,7 +2,6 @@ package main
 
 import (
 	"code.google.com/p/go.net/websocket"
-	"container/list"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -10,13 +9,16 @@ import (
 	"net/http"
 )
 
-var clients = list.New()
+//var clients = list.New()
+
+var clients = make(map[int]*Client)
 
 type Client struct {
 	ws   *websocket.Conn
 	data string
 	id   string
-	msg  *Message
+	offer  *Message
+	answer *Message
 }
 
 type Message struct {
@@ -56,40 +58,66 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 //change list to array
 func WsHandle(ws *websocket.Conn) {
 	log.Println("New client")
-	clients.PushBack(Client{ws, "", "", nil})
+	clients[len(clients)+1] = &Client{ws, "", "", nil, nil}
 	for {
 		if buff, err := ws_recv(ws); err != 1 {
 			var msg Message
 			json.Unmarshal([]byte(buff), &msg)
 			log.Println("Message decode ", msg)
 
-			for e := clients.Front(); e != nil; e = e.Next() {
-				cl := e.Value.(Client)
+			for _, cl := range clients {
+				// if ws != cl.ws {
+
+				// 	ws_send(msg.Data, cl.ws)
+				// }
 				if ws == cl.ws {
 					switch msg.Key {
 					case "SETKEY":
 						cl.id = msg.Uri
-						for e := clients.Front(); e != nil; e = e.Next() {
-							cli := e.Value.(Client)
-							if cli.ws != ws && cli.id == msg.Uri && cli.msg != nil {
-								log.Panicln("HEREEEEEEE")
-								ws_send(msg.Data, cli.ws)
+						newk := true
+						for _, cli := range clients {
+							if cli.ws != cl.ws && cli.id == cl.id {
+								newk = false
 							}
+						}
+						if newk {
+							ws_send("{\"Key\": \"NEW\", \"Uri\": \"\", \"Data\": \"\"}", cl.ws)
+						} else {
+							for _, cli := range clients {
+							log.Println("OFFER TAG", cli.ws, cli.id, cli.offer)
+							if cli.ws != ws && cli.id == msg.Uri && cli.offer != nil {
+								log.Println("SENDDDDD")
+								jsonstr, _ := json.Marshal(cli.offer)
+								ws_send(string(jsonstr), cl.ws)
+							}
+						}
 						}
 						break
 					case "OFFER":
-						cl.msg = &msg
-						for e := clients.Front(); e != nil; e = e.Next() {
-							cli := e.Value.(Client)
-							log.Panicln(cli.ws, cli.id, cli.msg)
-							if cli.ws != ws && cli.id == msg.Uri && cli.msg != nil {
-
-								ws_send(msg.Data, cli.ws)
+						cl.offer = &msg
+						for _, cli := range clients {
+							log.Println("OFFER TAG", cli.ws, cli.id, cli.offer)
+							if cli.ws != ws && cli.id == msg.Uri && cli.offer != nil {
+								log.Println("SENDDDDD")
+								jsonstr, _ := json.Marshal(cli.offer)
+								ws_send(string(jsonstr), cl.ws)
+							}
+						}
+						break
+					case "ANSWER":
+						cl.answer = &msg
+						for _, cli := range clients {
+							log.Println("OFFER ANSWER", cli.ws, cli.id, cli.answer)
+							if cli.ws != ws && cli.id == msg.Uri {
+								log.Println("SENDDDDD ANSWER")
+								jsonstr,_ := json.Marshal(cl.answer)
+								ws_send(string(jsonstr), cli.ws)
 							}
 						}
 						break
 					}
 				}
+
 			}
 
 		} else {

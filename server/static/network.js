@@ -139,7 +139,8 @@ Connection.prototype.createDataConnection = function(dc) {
             log(self.logtype + "got message datacon", e.data);
         };
         dc.onopen = function(e) {
-            log(self.logtype + "open datacon", e.data);
+            log(self.logtype + "Open datacon", e.data);
+            self.ws.close();
         };
         dc.onclose = function(e) {
             log(self.logtype + "datacon closed", e);

@@ -13,8 +13,6 @@ function Socket() {
                 "Uri": uri,
                 "Data": ""
             });
-            //host = new Connection(uri, socket);
-            //host.makeOffer();
         }
     };
 
@@ -40,6 +38,10 @@ function Socket() {
         log(self.logtype + "Closed");
     };
 }
+
+Socket.prototype.close = function() {
+    this.ws.close();
+};
 
 Socket.prototype.send = function(s) {
     s = JSON.stringify(s);

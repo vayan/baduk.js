@@ -8,11 +8,7 @@ function Socket() {
     this.ws.onopen = function() {
         log(self.logtype + "Open");
         if (uri) {
-            socket.send({
-                "Key": "SETKEY",
-                "Uri": uri,
-                "Data": ""
-            });
+            self.sendKey(uri);
         }
     };
 
@@ -39,8 +35,18 @@ function Socket() {
     };
 }
 
+
+
 Socket.prototype.close = function() {
     this.ws.close();
+};
+
+Socket.prototype.sendKey = function(k) {
+    this.send({
+        "Key": "SETKEY",
+        "Uri": k,
+        "Data": ""
+    });
 };
 
 Socket.prototype.send = function(s) {

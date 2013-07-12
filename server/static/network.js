@@ -19,7 +19,6 @@ function Connection(id, socket) {
             'RtpDataChannels': true
         }]
     };
-    //this.setID();
     this.createPeerConnection();
     this.listenICEcandidates();
     this.listenDataChan();
@@ -51,6 +50,7 @@ Connection.prototype.listenICEcandidates = function() {
     log(this.logtype + "Listening for ICEcandidates");
     this.pc.onicecandidate = function(e) {
         log(self.logtype + "Received ICE server, ", e);
+        log(self.logtype + '[c="color: red"]you can share the url[c]');
         if (e.candidate) {
             self.ws.send({
                 "Key": "CANDIDATE",

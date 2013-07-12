@@ -15,15 +15,12 @@ function gen_uri(size) {
 }
 
 $(document).ready(function() {
-
-
     $("#start").click(function() {
         if (!uri) {
             uri = gen_uri(5);
             location.hash = uri;
         }
-        host = new Connection(uri, socket);
-        host.makeOffer();
+        socket.sendKey(uri);
     });
     $("#send").click(function() {
         host.dc.send($("#msg").val());

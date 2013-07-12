@@ -22,6 +22,7 @@ function Connection(id, socket) {
     this.testBrowser();
     this.createPeerConnection();
     this.listenICEcandidates();
+    this.setupNegotiationHandler();
     this.listenDataChan();
     this.dc = this.createDataConnection();
 }
@@ -69,12 +70,21 @@ Connection.prototype.listenICEcandidates = function() {
                 "Key": "CANDIDATE",
                 "Uri": self.id,
                 "Data": JSON.stringify({
-                    "candidate": evt.candidate
+                    "candidate": e.candidate
                 })
             });
 
         }
     }
+};
+
+Connection.prototype.setupNegotiationHandler = function() {
+  var self = this;
+    log(this.logtype + "Listening for Negotiation");
+    this.pc.onnegotiationneeded = function() {
+    log(this.logtype + "Negotiation triggered");
+    //self.makeOffer();
+  };
 };
 
 Connection.prototype.listenDataChan = function() {
@@ -90,6 +100,7 @@ Connection.prototype.makeAnswer = function() {
     var self = this;
     this.pc.createAnswer(function(answer) {
         log(self.logtype + 'Created answer');
+
         self.pc.setLocalDescription(answer, function() {
             log(self.logtype + 'Set localDescription to answer');
             self.ws.send({
@@ -127,7 +138,6 @@ Connection.prototype.makeOffer = function() {
 
 Connection.prototype.handleSDP = function(sdp, type) {
     var self = this;
-    //check why must sdp and not sdp.sdp from json..
     sdp = new RTCSessionDescription(sdp);
 
     this.pc.setRemoteDescription(sdp, function() {
@@ -144,8 +154,9 @@ Connection.prototype.createDataConnection = function(dc) {
     var self = this;
     try {
         if (!dc) {
+            var reliable = BrowserType === 'Firefox' ? true : false;
             dc = self.pc.createDataChannel('test', {
-                reliable: true
+                reliable: reliable
             });
         }
         log(self.logtype + "Create DataChannel");

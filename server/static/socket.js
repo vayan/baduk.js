@@ -3,6 +3,9 @@
 function Socket() {
     var self = this;
     this.logtype = "_WS_  : "
+    if (!this.testCompat()) {
+        return;
+    }
     this.ws = new WebSocket("ws://localhost:8080/ws");
 
     this.ws.onopen = function() {
@@ -36,6 +39,13 @@ function Socket() {
 }
 
 
+Socket.prototype.testCompat = function() {
+    if ("WebSocket" in window) {
+        return true;
+    } else {
+        return false;
+    }
+};
 
 Socket.prototype.close = function() {
     this.ws.close();

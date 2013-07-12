@@ -19,6 +19,7 @@ function Connection(id, socket) {
             'RtpDataChannels': true
         }]
     };
+    this.testCompat();
     this.createPeerConnection();
     this.listenICEcandidates();
     this.listenDataChan();
@@ -33,6 +34,12 @@ Connection.prototype.setID = function() {
             "Uri": self.id,
             "Data": ""
     });
+};
+
+Connection.prototype.testCompat = function() {
+    var self = this;
+    log(this.logtype + "checking if browser compatible");
+
 };
 
 Connection.prototype.createPeerConnection = function() {

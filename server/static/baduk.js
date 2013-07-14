@@ -1,4 +1,4 @@
-//
+//"main"
 
 var socket = new Socket();
 var host;
@@ -18,7 +18,7 @@ socket.onconnectioncreated = function(e) {
         $("#gaming").show();
     };
     host.onmessage = function(s) {
-        $("#chatlog").val($('#chatlog').val()+s+"\n");
+        $("#chatlog").val($('#chatlog').val() + s + "\n");
     };
 };
 
@@ -53,7 +53,7 @@ $(document).ready(function() {
     });
     $("#send").click(function() {
         host.send($("#msg").val());
-        $("#chatlog").val($('#chatlog').val()+$("#msg").val()+"\n");
+        $("#chatlog").val($('#chatlog').val() + $("#msg").val() + "\n");
         $("#msg").val("");
     });
 });

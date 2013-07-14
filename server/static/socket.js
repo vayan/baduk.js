@@ -1,4 +1,4 @@
-//
+//Websocket signaling
 
 function Socket() {
     var self = this;

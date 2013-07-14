@@ -1,4 +1,4 @@
-//
+//WEBRTC Connexion & Stuff
 
 function Connection(id, socket) {
     this.id = id;
@@ -9,15 +9,17 @@ function Connection(id, socket) {
     this.ws = socket;
     this.cfg = {
         "iceServers": [{
-            "url": "stun:stun.l.google.com:19302"
-        }]
+                "url": "stun:stun.l.google.com:19302"
+            }
+        ]
     },
     con = {
         'optional': [{
-            'DtlsSrtpKeyAgreement': true
-        }, {
-            'RtpDataChannels': true
-        }]
+                'DtlsSrtpKeyAgreement': true
+            }, {
+                'RtpDataChannels': true
+            }
+        ]
     };
 
     //callback
@@ -43,9 +45,9 @@ Connection.prototype.setID = function() {
     var self = this;
     log(this.logtype + "Setting id");
     self.ws.send({
-            "Key": "SETKEY",
-            "Uri": self.id,
-            "Data": ""
+        "Key": "SETKEY",
+        "Uri": self.id,
+        "Data": ""
     });
 };
 
@@ -60,8 +62,9 @@ Connection.prototype.createPeerConnection = function() {
     log(this.logtype + "Creating RTCPeerConnection");
     this.pc = new RTCPeerConnection(self.cfg, {
         optional: [{
-            RtpDataChannels: true
-        }]
+                RtpDataChannels: true
+            }
+        ]
     });
 };
 
@@ -135,7 +138,6 @@ Connection.prototype.makeOffer = function() {
 Connection.prototype.handleSDP = function(sdp, type) {
     var self = this;
     sdp = new RTCSessionDescription(sdp);
-
     this.pc.setRemoteDescription(sdp, function() {
         log(self.logtype + 'Set RemoteDescription, ', type);
         if (type === 'OFFER') {

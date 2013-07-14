@@ -33,7 +33,7 @@ function gen_uri(size) {
 }
 
 $(document).ready(function() {
-
+    //if hash in url, joining game
     if (uri.length > 0) {
         $("#loading").show();
     } else {

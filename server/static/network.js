@@ -19,6 +19,14 @@ function Connection(id, socket) {
             'RtpDataChannels': true
         }]
     };
+
+    //callback
+    this.onshareurl;
+    this.onconnected;
+    this.onmessage;
+
+
+    //contructor
     this.testBrowser();
     this.createPeerConnection();
     this.listenICEcandidates();
@@ -62,8 +70,7 @@ Connection.prototype.listenICEcandidates = function() {
     log(this.logtype + "Listening for ICEcandidates");
     this.pc.onicecandidate = function(e) {
         log(self.logtype + "Received ICE server, ", e);
-        log(self.logtype + '[c="color: red"]you can share the url[c]');
-        $("#loading-message").text("Share this url with someone");
+        self.onshareurl();
         if (e.candidate) {
             self.ws.send({
                 "Key": "CANDIDATE",
@@ -127,7 +134,6 @@ Connection.prototype.makeOffer = function() {
 
 Connection.prototype.handleSDP = function(sdp, type) {
     var self = this;
-    //check why must sdp and not sdp.sdp from json..
     sdp = new RTCSessionDescription(sdp);
 
     this.pc.setRemoteDescription(sdp, function() {
@@ -141,6 +147,7 @@ Connection.prototype.handleSDP = function(sdp, type) {
 };
 
 Connection.prototype.createDataConnection = function(dc) {
+    //fix the two DC
     var self = this;
     try {
         if (!dc) {
@@ -151,13 +158,11 @@ Connection.prototype.createDataConnection = function(dc) {
         log(self.logtype + "Create DataChannel");
         dc.onmessage = function(e) {
             log(self.logtype + "got message datacon", e.data);
-            $("#chatlog").val($('#chatlog').val()+e.data+"\n");
+            self.onmessage(e.data);
         };
         dc.onopen = function(e) {
             log(self.logtype + "Open datacon", e.data);
-            self.ws.close();
-             $(".page-state").hide();
-            $("#gaming").show();
+            self.onconnected();
         };
         dc.onclose = function(e) {
             log(self.logtype + "datacon closed", e);

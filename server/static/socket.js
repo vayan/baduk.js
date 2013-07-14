@@ -2,7 +2,8 @@
 
 function Socket() {
     var self = this;
-    this.logtype = "_WS_  : "
+    this.logtype = "_WS_  : ";
+    this.onconnectioncreated;
     if (!this.testBrowser()) {
         return;
     }
@@ -23,9 +24,11 @@ function Socket() {
             case 'NEW':
                 host = new Connection(uri, socket);
                 host.makeOffer();
+                self.onconnectioncreated();
                 break;
             case 'OFFER':
                 host = new Connection(jsone.Uri, self);
+                self.onconnectioncreated();
                 host.handleSDP(JSON.parse(jsone.Data), 'OFFER');
                 break;
             case 'ANSWER':

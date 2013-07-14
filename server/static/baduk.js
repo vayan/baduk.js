@@ -5,6 +5,23 @@ var host;
 var game;
 var uri = window.location.hash.replace("#", "");
 
+socket.onconnectioncreated = function(e) {
+    host.onshareurl = function(e) {
+        log("_GAME_ " + '[c="color: red"]you can share the url[c]');
+        $("#loading-message").text("Share this url with someone");
+    };
+
+    host.onconnected = function(e) {
+        log("_GAME_ " + '[c="color: red"]P2P link etablished[c]');
+        socket.close();
+        $(".page-state").hide();
+        $("#gaming").show();
+    };
+    host.onmessage = function(s) {
+        $("#chatlog").val($('#chatlog').val()+s+"\n");
+    };
+};
+
 function gen_uri(size) {
     var charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     var uri = "";

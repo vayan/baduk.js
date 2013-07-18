@@ -1,4 +1,4 @@
-//
+//WEBRTC Connexion & Stuff
 
 function Connection(id, socket) {
     this.id = id;
@@ -9,16 +9,26 @@ function Connection(id, socket) {
     this.ws = socket;
     this.cfg = {
         "iceServers": [{
-            "url": "stun:stun.l.google.com:19302"
-        }]
+                "url": "stun:stun.l.google.com:19302"
+            }
+        ]
     },
     con = {
         'optional': [{
-            'DtlsSrtpKeyAgreement': true
-        }, {
-            'RtpDataChannels': true
-        }]
+                'DtlsSrtpKeyAgreement': true
+            }, {
+                'RtpDataChannels': true
+            }
+        ]
     };
+
+    //callback
+    this.onshareurl;
+    this.onconnected;
+    this.onmessage;
+
+
+    //contructor
     this.testBrowser();
     this.createPeerConnection();
     this.listenICEcandidates();
@@ -36,9 +46,9 @@ Connection.prototype.setID = function() {
     var self = this;
     log(this.logtype + "Setting id");
     self.ws.send({
-            "Key": "SETKEY",
-            "Uri": self.id,
-            "Data": ""
+        "Key": "SETKEY",
+        "Uri": self.id,
+        "Data": ""
     });
 };
 
@@ -53,8 +63,9 @@ Connection.prototype.createPeerConnection = function() {
     log(this.logtype + "Creating RTCPeerConnection");
     this.pc = new RTCPeerConnection(self.cfg, {
         optional: [{
-            RtpDataChannels: true
-        }]
+                RtpDataChannels: true
+            }
+        ]
     });
 };
 
@@ -63,8 +74,7 @@ Connection.prototype.listenICEcandidates = function() {
     log(this.logtype + "Listening for ICEcandidates");
     this.pc.onicecandidate = function(e) {
         log(self.logtype + "Received ICE server, ", e);
-        log(self.logtype + '[c="color: red"]you can share the url[c]');
-        $("#loading-message").text("Share this url with someone");
+        self.onshareurl();
         if (e.candidate) {
             self.ws.send({
                 "Key": "CANDIDATE",
@@ -139,7 +149,6 @@ Connection.prototype.makeOffer = function() {
 Connection.prototype.handleSDP = function(sdp, type) {
     var self = this;
     sdp = new RTCSessionDescription(sdp);
-
     this.pc.setRemoteDescription(sdp, function() {
         log(self.logtype + 'Set RemoteDescription, ', type);
         if (type === 'OFFER') {
@@ -151,6 +160,7 @@ Connection.prototype.handleSDP = function(sdp, type) {
 };
 
 Connection.prototype.createDataConnection = function(dc) {
+    //fix the two DC
     var self = this;
     try {
         if (!dc) {
@@ -162,13 +172,11 @@ Connection.prototype.createDataConnection = function(dc) {
         log(self.logtype + "Create DataChannel");
         dc.onmessage = function(e) {
             log(self.logtype + "got message datacon", e.data);
-            $("#chatlog").val($('#chatlog').val()+e.data+"\n");
+            self.onmessage(e.data);
         };
         dc.onopen = function(e) {
             log(self.logtype + "Open datacon", e.data);
-            self.ws.close();
-             $(".page-state").hide();
-            $("#gaming").show();
+            self.onconnected();
         };
         dc.onclose = function(e) {
             log(self.logtype + "datacon closed", e);

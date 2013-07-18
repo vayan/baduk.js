@@ -45,8 +45,12 @@ socket.onconnectioncreated = function(e) {
 function new_game(size, handi) {
     game = new Game(size, handi);
     game.onboardupdate = function(e) {
-        log("_GAME_ : new move");
+        log("_GAME_ : receive move");
         //TODO : UPDATE UI
+    };
+    game.onboardchange = function(e) {
+        log("_GAME_ : new local move");
+        //TODO : SEND BOARD
     };
 }
 

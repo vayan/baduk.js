@@ -10,6 +10,8 @@ function Game(size, handicap) {
 	this.handicap = handicap;
     this.board = this.GenBoard(size);
 
+    this.onboardupdate = function() {};
+
 }
 
 Game.prototype.GenBoard = function(size) {
@@ -25,9 +27,17 @@ Game.prototype.GenBoard = function(size) {
     return board;
 };
 
+Game.prototype.UpdateBoard = function(board) {
+    var self = this;
+
+    self.board = board;
+    self.onboardupdate();
+};
+
 Game.prototype.SetSettings = function(jsonstring) {
 	var settings = JSON.parse(jsonstring);
 
 	this.board_size = settings.board_size;
 	this.handicap = settings.handicap;
+    this.board = settings.board;
 };

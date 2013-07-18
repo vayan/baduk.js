@@ -2,19 +2,19 @@
 
 ## general
     {
-    "type" :   ,
-    "data" : 
-    }  
+    "action" :   ,
+    "data" :
+    }
 
 ### e.g : play & event
     {
-    "type" : "PLAY",
-    "data" : board_array 
+    "action" : "PLAY",
+    "data" : board_array
     }
-    
+
     {
-    "type" : "EVENT",
+    "action" : "EVENT",
     "data" : "SURRENDER"
     }
-    
+
 **TODO**

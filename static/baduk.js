@@ -16,12 +16,39 @@ socket.onconnectioncreated = function(e) {
         socket.close();
         $(".page-state").hide();
         $("#gaming").show();
+        if (game) {
+            host.send({
+                "action": "GAME",
+                "data": JSON.stringify(game)
+            });
+        }
     };
     host.onmessage = function(s) {
+        var resp = JSON.parse(s);
 
+        switch (resp.action) {
+            case 'UPDATE':
+                game.UpdateBoard(resp.data);
+                break;
+            case 'EVENT':
+                //TODO : lose win surrender etc..Etc..
+                break;
+            case 'GAME':
+                new_game(1, 1);
+                game.SetSettings(resp.data);
+                break;
+        }
         $("#chatlog").val($('#chatlog').val() + s + "\n");
     };
 };
+
+function new_game(size, handi) {
+    game = new Game(size, handi);
+    game.onboardupdate = function(e) {
+        log("_GAME_ : new move");
+        //TODO : UPDATE UI
+    };
+}
 
 function gen_uri(size) {
     var charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -42,8 +69,7 @@ $(document).ready(function() {
     }
 
     $("#start").click(function() {
-        game = new Game(19, 4);
-        log(JSON.stringify(game));
+        new_game(19, 0);
         if (!uri) {
             uri = gen_uri(5);
             location.hash = uri;

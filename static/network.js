@@ -39,7 +39,9 @@ function Connection(id, socket) {
 
 Connection.prototype.send = function(s) {
     var self = this;
-    self.dc.send(JSON.stringify(s))
+    var str = JSON.stringify(s);
+    log(this.logtype + " Sending ", str);
+    self.dc.send(str);
 };
 
 Connection.prototype.setID = function() {

@@ -18,6 +18,7 @@ socket.onconnectioncreated = function(e) {
         $("#gaming").show();
     };
     host.onmessage = function(s) {
+
         $("#chatlog").val($('#chatlog').val() + s + "\n");
     };
 };
@@ -41,7 +42,7 @@ $(document).ready(function() {
     }
 
     $("#start").click(function() {
-        var game = new Game(19, 4);
+        game = new Game(19, 4);
         log(JSON.stringify(game));
         if (!uri) {
             uri = gen_uri(5);

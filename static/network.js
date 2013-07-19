@@ -76,25 +76,27 @@ Connection.prototype.listenICEcandidates = function() {
     log(this.logtype + "Listening for ICEcandidates");
     this.pc.onicecandidate = function(e) {
         log(self.logtype + "Received ICE server, ", e);
-        self.onshareurl();
-        if (e.candidate) {
-            self.ws.send({
-                "Key": "CANDIDATE",
-                "Uri": self.id,
-                "Data": JSON.stringify({
-                    "candidate": e.candidate
-                })
-            });
 
+        if (e.candidate) {
+            // self.ws.send({
+            //     "Key": "CANDIDATE",
+            //     "Uri": self.id,
+            //     "Data": JSON.stringify({
+            //         "candidate": e.candidate
+            //     })
+            // });
+
+        } else {
+            self.onshareurl();
         }
     }
 };
 
 Connection.prototype.setupNegotiationHandler = function() {
   var self = this;
-    log(this.logtype + "Listening for Negotiation");
+    log(self.logtype + "Listening for Negotiation");
     this.pc.onnegotiationneeded = function() {
-    log(this.logtype + "Negotiation triggered");
+    log(self.logtype + "Negotiation triggered");
     //self.makeOffer();
   };
 };
@@ -166,7 +168,7 @@ Connection.prototype.createDataConnection = function(dc) {
     var self = this;
     try {
         if (!dc) {
-            var reliable = BrowserType === 'Firefox' ? true : false;
+            var reliable = (BrowserType === 'Firefox') ? true : false;
             dc = self.pc.createDataChannel('test', {
                 reliable: reliable
             });

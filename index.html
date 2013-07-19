@@ -1,24 +1,24 @@
 <!doctype html>
 <html>
-<head>
-	<meta charset="utf-8">
-	<meta name="description" content="">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>web rtc</title>
-    <style>
-    .hidden {
-        display: none;
-    }
-    </style>
-</head>
-<body>
-    <div id="landing" class="page-state hidden">
-        <p>Hey</p>
-        <button id="start">new</button>
-    </div>
-    <div id="loading" class="page-state hidden">
-        <span class="loading-icon"><img src="/static/img/spinner.gif" /></p>
-            <p id="loading-message">connecting...</p>
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>web rtc</title>
+        <style>
+        .hidden {
+            display: none;
+        }
+        </style>
+    </head>
+    <body>
+        <div id="landing" class="page-state hidden">
+            <p>Hey</p>
+            <button id="start">new</button>
+        </div>
+        <div id="loading" class="page-state hidden">
+            <span class="loading-icon"><img src="/static/img/spinner.gif" /></p>
+                <p id="loading-message">connecting...</p>
         </div>
         <div id="gaming" class="page-state hidden">
             <input type="text" id="msg" />
@@ -32,5 +32,5 @@
         <script src="static/network.js"></script>
         <script src="static/game.js"></script>
         <script src="static/baduk.js"></script>
-</body>
+    </body>
 </html>

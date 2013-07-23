@@ -7,3 +7,6 @@ canvas {
     margin: 20px;
 }
 
+#board {
+    border: 1px solid black;
+}

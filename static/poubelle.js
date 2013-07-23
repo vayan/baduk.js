@@ -12,7 +12,7 @@ var bH = caseH * nbCases;
 var p = 10;
 var padding = (p*2) + 1;
 
-var testcanvas;
+
 var i = 0;
 var j = 0;
 var styleDIV;
@@ -29,6 +29,7 @@ function init() {
  //   context = $('#board_canvas')[0].getContext('2d');
    // cW = $("canvas").attr("width", bW+padding);
   //  cH = $("canvas").attr("height", bH+padding);
+  $("#board").css("width",caseW*nbCases+"px");
 
     drawAllBoard()
 
@@ -38,6 +39,7 @@ function init() {
 }
 
 function drawOneCanvas() {
+    var testcanvas;
 
     testcanvas = document.createElement('canvas');
 
@@ -45,26 +47,26 @@ function drawOneCanvas() {
     testcanvas.width = 30;
     testcanvas.height = 30;
     testcanvas.style.margin = 3;
-    if (j == bH) {
+    // if (j == bH) {
 
-        testcanvas.style.display = "block";
-    }
+    //     testcanvas.style.display = "block";
+    // }
 
-    var div = document.getElementsByTagName("div")[0];
-    div.appendChild(testcanvas);
+    //var div = document.getElementsByTagName("div")[0];
+    $("#board").append(testcanvas);
 }
 
 function drawAllBoard() {
 
-    while (i  < bW) {
-        while (j <= bH) {
+    while (i  < nbCases) {
+        while (j <= nbCases) {
 
             console.log("whileJ");
             drawOneCanvas();
-            j += caseH;
+            j ++;
         }
         console.log("whilei");
-        i += caseW;
+        i ++;
         j = 0;
     }
 }

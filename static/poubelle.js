@@ -7,71 +7,77 @@ var caseH = 40;
 var nbCases = 18;
 var bW = caseW * nbCases;
 var bH = caseH * nbCases;
-var arrayBoard = new Array(bW);
 
-var contexttest, widthtest, heighttest, derp;
 //padding around grid
 var p = 10;
 var padding = (p*2) + 1;
+
+var testcanvas;
+var i = 0;
+var j = 0;
+var styleDIV;
+
 
 $(document).ready(function(){
     init();
 });
 
+
+
 function init() {
 
-    context = $('#board_canvas')[0].getContext('2d');
-    cW = $("canvas").attr("width", bW+padding);
-    cH = $("canvas").attr("height", bH+padding);
+ //   context = $('#board_canvas')[0].getContext('2d');
+   // cW = $("canvas").attr("width", bW+padding);
+  //  cH = $("canvas").attr("height", bH+padding);
 
-    contexttest = $('#testyo')[0].getContext('2d');
-    heighttest = $('#testyo').attr("height", 300);
-    widthtest = $('#testyo').attr("width", 300);
+    drawAllBoard()
 
-    contexttest.beginPath();
-    contexttest.moveTo(150, 0);
-    contexttest.lineTo(150, 300)
-    contexttest.moveTo(0, 150);
-    contexttest.lineTo(300, 150);
-    contexttest.strokeStyle = "#000000";
-    contexttest.stroke();
 
-    cloneCanvas('#testyo');
-
-    drawGoban();
-    playGo();
+   // drawGoban();
+   // playGo();
 }
 
-function cloneCanvas(oldCanvas) {
+function drawOneCanvas() {
 
-    //create a new canvas
-    var newCanvas = document.createElement('canvas');
-    var contextclone = newCanvas.getContext('2d');
+    testcanvas = document.createElement('canvas');
 
-    //set dimensions
-    //newCanvas.width = oldCanvas.width;
-    //newCanvas.height = oldCanvas.height;
+    testcanvas.id = "CursorLayer";
+    testcanvas.width = 30;
+    testcanvas.height = 30;
+    testcanvas.style.margin = 3;
+    if (j == bH) {
 
-    //apply the old canvas to the new one
-    //contextclone.drawImage(oldCanvas, 0, 0);
+        testcanvas.style.display = "block";
+    }
 
-    //return the new canvas
-    return newCanvas;
+    var div = document.getElementsByTagName("div")[0];
+    div.appendChild(testcanvas);
 }
 
+function drawAllBoard() {
 
+    while (i  < bW) {
+        while (j <= bH) {
 
-
-
+            console.log("whileJ");
+            drawOneCanvas();
+            j += caseH;
+        }
+        console.log("whilei");
+        i += caseW;
+        j = 0;
+    }
+}
+/*
 function drawGoban(){
 
-    for (var x = 0; x <= bW; x += 40) {
+    for (var x = 0; x <= bW; x += caseW) {
 
         context.moveTo(0.5 + x + p, p);
         context.lineTo(0.5 + x + p, bH + p);
     }
 
-    for (var x = 0; x <= bH; x += 40) {
+    for (var x = 0; x <= bH; x += caseH) {
 
         context.moveTo(p, 0.5 + x + p);
         context.lineTo(bW + p, 0.5 + x + p);
@@ -149,6 +155,4 @@ function drawHoshiTengen() {
     }
 }
 
-function testdrawBoard() {
-
-}
+    */

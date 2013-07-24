@@ -12,65 +12,49 @@ var bH = caseH * nbCases;
 var p = 10;
 var padding = (p*2) + 1;
 
-
-var i = 0;
-var j = 0;
-var styleDIV;
-
-
 $(document).ready(function(){
     init();
 });
 
-
-
 function init() {
 
- //   context = $('#board_canvas')[0].getContext('2d');
-   // cW = $("canvas").attr("width", bW+padding);
-  //  cH = $("canvas").attr("height", bH+padding);
-  $("#board").css("width",caseW*nbCases+"px");
+    context = $('#board_canvas')[0].getContext('2d');
+    cW = $('#board_canvas').css("width", bW+padding+"px");
+    $('#board_canvas').css("height", bH+padding+"px");
+    $('#board_canvas').attr("height", bH+padding);
+    $('#board_canvas').attr("width", bW+padding);
 
-    drawAllBoard()
+    $("#board").css("width",bW+"px");
 
-
-   // drawGoban();
-   // playGo();
+    drawAllBoard();
+    drawGoban();
+    playGo();
 }
 
 function drawOneCanvas() {
     var testcanvas;
 
     testcanvas = document.createElement('canvas');
-
-    testcanvas.id = "CursorLayer";
-    testcanvas.width = 30;
-    testcanvas.height = 30;
-    testcanvas.style.margin = 3;
-    // if (j == bH) {
-
-    //     testcanvas.style.display = "block";
-    // }
-
-    //var div = document.getElementsByTagName("div")[0];
-    $("#board").append(testcanvas);
+    testcanvas.globalAlpha = 0.5;
+    $("#board").append("<canvas class='case'></canvas>");
 }
 
 function drawAllBoard() {
 
+    var i = 0, j = 0;
     while (i  < nbCases) {
         while (j <= nbCases) {
 
-            console.log("whileJ");
             drawOneCanvas();
+           // $('#board_canvas').val("'.i.'");
+            console.log($('#board_canvas').val(i));
             j ++;
         }
-        console.log("whilei");
         i ++;
         j = 0;
     }
 }
-/*
+
 function drawGoban(){
 
     for (var x = 0; x <= bW; x += caseW) {
@@ -156,5 +140,3 @@ function drawHoshiTengen() {
 
     }
 }
-
-    */
